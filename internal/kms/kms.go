@@ -145,7 +145,7 @@ func (k *Kms) GetExternalWrappers() *ExternalWrappers {
 
 // GetWrapper returns a wrapper for the given scope and purpose. When a keyId is
 // passed, it will ensure that the returning wrapper has that key ID in the
-// multiwrapper. This is not necesary for encryption but should be supplied for
+// multiwrapper. This is not necessary for encryption but should be supplied for
 // decryption.
 func (k *Kms) GetWrapper(ctx context.Context, scopeId string, purpose KeyPurpose, opt ...Option) (wrapping.Wrapper, error) {
 	const op = "kms.GetWrapper"

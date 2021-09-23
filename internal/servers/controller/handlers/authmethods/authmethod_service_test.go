@@ -166,7 +166,7 @@ func TestGet(t *testing.T) {
 			res:     &pbs.GetAuthMethodResponse{Item: wantOidc},
 		},
 		{
-			name:    "Get a non existant AuthMethod",
+			name:    "Get a non existent AuthMethod",
 			scopeId: o.GetPublicId(),
 			req:     &pbs.GetAuthMethodRequest{Id: password.AuthMethodPrefix + "_DoesntExis"},
 			res:     nil,

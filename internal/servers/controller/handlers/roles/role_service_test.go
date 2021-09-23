@@ -121,7 +121,7 @@ func TestGet(t *testing.T) {
 			res:     &pbs.GetRoleResponse{Item: wantOrgRole},
 		},
 		{
-			name: "Get a non existant Role",
+			name: "Get a non existent Role",
 			req:  &pbs.GetRoleRequest{Id: iam.RolePrefix + "_DoesntExis"},
 			res:  nil,
 			err:  handlers.ApiErrorWithCode(codes.NotFound),
@@ -145,7 +145,7 @@ func TestGet(t *testing.T) {
 			res:     &pbs.GetRoleResponse{Item: wantProjRole},
 		},
 		{
-			name:    "Project Scoped Get a non existant Role",
+			name:    "Project Scoped Get a non existent Role",
 			scopeId: pr.GetScopeId(),
 			req:     &pbs.GetRoleRequest{Id: iam.RolePrefix + "_DoesntExis"},
 			res:     nil,
@@ -779,10 +779,10 @@ func TestUpdate(t *testing.T) {
 			err: handlers.ApiErrorWithCode(codes.InvalidArgument),
 		},
 		{
-			name:    "Only non-existant paths in Mask",
+			name:    "Only non-existent paths in Mask",
 			scopeId: or.GetScopeId(),
 			req: &pbs.UpdateRoleRequest{
-				UpdateMask: &field_mask.FieldMask{Paths: []string{"nonexistant_field"}},
+				UpdateMask: &field_mask.FieldMask{Paths: []string{"nonexistent_field"}},
 				Item: &pb.Role{
 					Name:        &wrapperspb.StringValue{Value: "updated name"},
 					Description: &wrapperspb.StringValue{Value: "updated desc"},
@@ -1930,7 +1930,7 @@ func TestRemoveGrants(t *testing.T) {
 			result:   []string{"id=2;type=*;actions=delete"},
 		},
 		{
-			name:     "Remove non existant",
+			name:     "Remove non existent",
 			existing: []string{"id=2;type=*;actions=delete"},
 			remove:   []string{"id=1;type=*;actions=read"},
 			result:   []string{"id=2;type=*;actions=delete"},

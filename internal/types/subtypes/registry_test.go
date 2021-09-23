@@ -47,7 +47,7 @@ func TestSubtypeFromType(t *testing.T) {
 	}{
 		{"empty-string", "", subtypes.UnknownSubtype},
 		{"correct-string", "test", testSubtype},
-		{"captialized", "TEST", subtypes.UnknownSubtype},
+		{"capitalized", "TEST", subtypes.UnknownSubtype},
 		{"typo", "testt", subtypes.UnknownSubtype},
 	}
 	for _, tt := range tests {

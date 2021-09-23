@@ -306,7 +306,7 @@ func WithGormFormatter(l hclog.Logger) Option {
 	}
 }
 
-// WithMaxOpenConnections specifices and optional max open connections for the
+// WithMaxOpenConnections specifies and optional max open connections for the
 // database
 func WithMaxOpenConnections(max int) Option {
 	return func(o *Options) {

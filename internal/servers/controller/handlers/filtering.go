@@ -16,7 +16,7 @@ type Filter struct {
 	eval *bexpr.Evaluator
 }
 
-// NewFilter returns a Filter which can be evluated against.  An empty string paramter indicates
+// NewFilter returns a Filter which can be evluated against.  An empty string parameter indicates
 // all items passed to it should succeed.
 func NewFilter(f string) (*Filter, error) {
 	const op = "handlers.NewFilter"

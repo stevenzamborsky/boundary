@@ -106,7 +106,7 @@ func TestGetSession(t *testing.T) {
 			res:     &pbs.GetSessionResponse{Item: wireSess},
 		},
 		{
-			name: "Get a non existant Session",
+			name: "Get a non existent Session",
 			req:  &pbs.GetSessionRequest{Id: session.SessionPrefix + "_DoesntExis"},
 			res:  nil,
 			err:  handlers.ApiErrorWithCode(codes.NotFound),

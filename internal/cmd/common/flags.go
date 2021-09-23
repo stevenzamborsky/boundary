@@ -369,7 +369,7 @@ func HandleAttributeFlags(c *base.Command, suffix, fullField string, sepFields [
 
 				default:
 					// It's not a slice, so create a new slice with the
-					// exisitng and new values
+					// existing and new values
 					currMap[segment] = []interface{}{t, val}
 				}
 
