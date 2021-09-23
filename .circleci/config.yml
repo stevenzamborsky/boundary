@@ -16,6 +16,25 @@ jobs:
         command: |
           make test-sql POSTGRES_DOCKER_IMAGE_BASE=docker.mirror.hashicorp.services/postgres PG_DOCKER_TAG=13-alpine
         name: Run SQL PgTap Tests
+  lint-diff:
+    machine:
+      image: ubuntu-2004:202107-02
+    steps:
+    - checkout
+    - run:
+        command: |
+          unset GOPATH
+          make install-go
+          source ~/.bashrc
+          make golangci-lint
+        name: Install Tools
+    - run:
+        command: |
+          source ~/.bashrc
+          make lint-diff || true
+        name: Lint Diff
+        no_output_timeout: 15m
+    working_directory: ~/boundary
   test-api:
     machine:
       image: ubuntu-2004:202111-01
@@ -90,6 +109,25 @@ jobs:
           git status --porcelain
           test -z "$(git status --porcelain)"
         name: Check make gen deltas
+  lint:
+    machine:
+      image: ubuntu-2004:202107-02
+    steps:
+    - checkout
+    - run:
+        command: |
+          unset GOPATH
+          make install-go
+          source ~/.bashrc
+          make golangci-lint
+        name: Install Tools
+    - run:
+        command: |
+          source ~/.bashrc
+          make lint || true
+        name: Lint
+        no_output_timeout: 15m
+    working_directory: ~/boundary
   test-sdk:
     machine:
       image: ubuntu-2004:202111-01
@@ -322,6 +360,7 @@ workflows:
     - build
     - test-api
     - test-sdk
+    - lint
     - test-sql-latest
     - test-sql-11-alpine
     - test-sql-12-alpine
@@ -332,6 +371,10 @@ workflows:
             only:
             - stable-website
     - make-gen-deltas
+  lint:
+    jobs:
+    - lint
+    - lint-diff
   trigger-merge-to-ent:
     jobs:
     - trigger-merge-to-ent:
@@ -425,6 +468,44 @@ workflows:
 #                 fail_only: true
 #                 only_for_branches: master
 #                 webhook: webhook
+#     lint:
+#         machine:
+#             image: ubuntu-2004:202107-02
+#         steps:
+#             - checkout
+#             - run:
+#                 command: |
+#                     unset GOPATH
+#                     make install-go
+#                     source ~/.bashrc
+#                     make golangci-lint
+#                 name: Install Tools
+#             - run:
+#                 command: |
+#                     source ~/.bashrc
+#                     make lint || true
+#                 name: Lint
+#                 no_output_timeout: 15m
+#         working_directory: ~/boundary
+#     lint-diff:
+#         machine:
+#             image: ubuntu-2004:202107-02
+#         steps:
+#             - checkout
+#             - run:
+#                 command: |
+#                     unset GOPATH
+#                     make install-go
+#                     source ~/.bashrc
+#                     make golangci-lint
+#                 name: Install Tools
+#             - run:
+#                 command: |
+#                     source ~/.bashrc
+#                     make lint-diff || true
+#                 name: Lint Diff
+#                 no_output_timeout: 15m
+#         working_directory: ~/boundary
 #     make-gen-deltas:
 #         executor: go-machine-medium
 #         steps:
@@ -487,6 +568,7 @@ workflows:
 #             - build
 #             - test-api
 #             - test-sdk
+#             - lint
 #             - test-sql:
 #                 matrix:
 #                     parameters:
@@ -501,6 +583,10 @@ workflows:
 #                         only:
 #                             - stable-website
 #             - make-gen-deltas
+#     lint:
+#         jobs:
+#             - lint
+#             - lint-diff
 #     trigger-merge-to-ent:
 #         jobs:
 #             - trigger-merge-to-ent:

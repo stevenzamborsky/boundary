@@ -2,6 +2,7 @@ jobs:
   - build
   - test-api
   - test-sdk
+  - lint
   - test-sql:
       matrix:
         parameters:

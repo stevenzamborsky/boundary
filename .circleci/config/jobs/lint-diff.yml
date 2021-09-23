@@ -1,0 +1,18 @@
+machine:
+  image: 'ubuntu-2004:202107-02'
+working_directory: ~/boundary
+steps:
+- checkout
+- run:
+    name: "Install Tools"
+    command: |
+      unset GOPATH
+      make install-go
+      source ~/.bashrc
+      make golangci-lint
+- run:
+    name: "Lint Diff"
+    no_output_timeout: 15m
+    command: |
+      source ~/.bashrc
+      make lint-diff || true
