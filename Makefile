@@ -9,6 +9,7 @@ REPO_PATH := github.com/hashicorp/boundary
 GENERATED_CODE := $(shell  find ${THIS_DIR} -name '*.gen.go' && find ${THIS_DIR} -name '*.pb.go' && find ${THIS_DIR} -name '*.pb.gw.go')
 
 CGO_ENABLED?=0
+GO_PATH = $(shell go env GOPATH)
 
 export GEN_BASEPATH := $(shell pwd)
 
@@ -21,8 +22,18 @@ cli:
 	$(MAKE) --environment-overrides -C internal/cmd/gencli cli
 
 .PHONY: tools
-tools:
+tools: golangci-lint
 	go generate -tags tools tools/tools.go
+
+# golangci-lint recommends installing the binary directly, instead of using go get
+# See the note: https://golangci-lint.run/usage/install/#install-from-source
+.PHONY: golangci-lint
+golangci-lint:
+	$(eval GOLINT_INSTALLED := $(shell which golangci-lint))
+
+	if [ "$(GOLINT_INSTALLED)" = "" ]; then \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GO_PATH)/bin v1.42.1; \
+	fi;
 
 .PHONY: cleangen
 cleangen:
@@ -49,6 +60,14 @@ install: build
 .PHONY: fmt
 fmt:
 	gofumpt -w $$(find . -name '*.go' | grep -v pb.go | grep -v pb.gw.go)
+
+lint:
+	golangci-lint run --timeout 10m
+
+LINT_DIFF_BRANCH ?= main
+
+lint-diff:
+	golangci-lint run --timeout 10m --new-from-rev=$(LINT_DIFF_BRANCH)
 
 # Set env for all UI targets.
 UI_TARGETS := update-ui-version build-ui build-ui-ifne
