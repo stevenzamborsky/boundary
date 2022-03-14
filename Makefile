@@ -64,9 +64,12 @@ fmt:
 lint:
 	golangci-lint run --timeout 10m
 
-LINT_DIFF_BRANCH ?= main
+ifndef LINT_DIFF_BRANCH
+override LINT_DIFF_BRANCH = main
+endif
 
 lint-diff:
+	@echo "Checking for lint compared to $(LINT_DIFF_BRANCH)"
 	golangci-lint run --timeout 10m --new-from-rev=$(LINT_DIFF_BRANCH)
 
 # Set env for all UI targets.

@@ -1,0 +1,16 @@
+name: lint
+on: push
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    name: Go lint
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17.5"
+      - name: lint
+        run: |
+          LINT_DIFF_BRANCH=${GITHUB_BASE_REF} make lint-diff
