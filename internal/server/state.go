@@ -1,4 +1,4 @@
-package servers
+package server
 
 // CertificateState defines the possible states for a workerauth certificate
 type CertificateState string

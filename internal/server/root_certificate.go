@@ -1,4 +1,4 @@
-package servers
+package server
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/boundary/internal/errors"
 
 	timestamp "github.com/hashicorp/boundary/internal/db/timestamp"
-	"github.com/hashicorp/boundary/internal/servers/store"
+	"github.com/hashicorp/boundary/internal/server/store"
 	"google.golang.org/protobuf/proto"
 )
 

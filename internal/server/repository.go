@@ -1,4 +1,4 @@
-package servers
+package server
 
 import (
 	"github.com/hashicorp/boundary/internal/db"

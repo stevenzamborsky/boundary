@@ -7,6 +7,9 @@
 package services
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	authmethods "github.com/hashicorp/boundary/sdk/pbs/controller/api/resources/authmethods"
 	authtokens "github.com/hashicorp/boundary/sdk/pbs/controller/api/resources/authtokens"
@@ -17,8 +20,6 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	structpb "google.golang.org/protobuf/types/known/structpb"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -743,7 +744,7 @@ type PasswordLoginAttributes struct {
 	unknownFields protoimpl.UnknownFields
 
 	LoginName string `protobuf:"bytes,1,opt,name=login_name,proto3" json:"login_name,omitempty" class:"sensitive"` // @gotags: `class:"sensitive"`
-	Password  string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" class:"secret"`     // @gotags: `class:"secret"`
+	Password  string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" class:"secret"`        // @gotags: `class:"secret"`
 }
 
 func (x *PasswordLoginAttributes) Reset() {

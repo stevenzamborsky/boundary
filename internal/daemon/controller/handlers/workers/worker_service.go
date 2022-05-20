@@ -12,7 +12,7 @@ import (
 	pbs "github.com/hashicorp/boundary/internal/gen/controller/servers/services"
 	"github.com/hashicorp/boundary/internal/kms"
 	"github.com/hashicorp/boundary/internal/observability/event"
-	"github.com/hashicorp/boundary/internal/servers"
+	"github.com/hashicorp/boundary/internal/server"
 	"github.com/hashicorp/boundary/internal/session"
 	"github.com/hashicorp/boundary/internal/types/scope"
 	"github.com/hashicorp/boundary/sdk/pbs/controller/api/resources/targets"
@@ -73,29 +73,29 @@ func (ws *workerServiceServer) Status(ctx context.Context, req *pbs.StatusReques
 
 	reqServer := req.GetWorker()
 	// Convert API tags to storage tags
-	workerTags := make([]*servers.Tag, 0, len(reqServer.Tags))
+	workerTags := make([]*server.Tag, 0, len(reqServer.Tags))
 	for k, v := range reqServer.Tags {
 		for _, val := range v.GetValues() {
-			workerTags = append(workerTags, &servers.Tag{
+			workerTags = append(workerTags, &server.Tag{
 				Key:   k,
 				Value: val,
 			})
 		}
 	}
 
-	worker := servers.NewWorker(scope.Global.String(),
-		servers.WithPublicId(reqServer.PrivateId),
-		servers.WithAddress(reqServer.Address),
-		servers.WithWorkerTags(workerTags...))
-	controllers, _, err := serverRepo.UpsertWorker(ctx, worker, servers.WithUpdateTags(req.GetUpdateTags()))
+	worker := server.NewWorker(scope.Global.String(),
+		server.WithPublicId(reqServer.PrivateId),
+		server.WithAddress(reqServer.Address),
+		server.WithWorkerTags(workerTags...))
+	controllers, _, err := serverRepo.UpsertWorker(ctx, worker, server.WithUpdateTags(req.GetUpdateTags()))
 	if err != nil {
 		event.WriteError(ctx, op, err, event.WithInfoMsg("error storing worker status"))
 		return &pbs.StatusResponse{}, status.Errorf(codes.Internal, "Error storing worker status: %v", err)
 	}
 
-	responseControllers := []*servers.Server{}
+	responseControllers := []*server.Server{}
 	for _, c := range controllers {
-		thisController := &servers.Server{
+		thisController := &server.Server{
 			PrivateId:  c.PrivateId,
 			Address:    c.Address,
 			CreateTime: c.CreateTime,

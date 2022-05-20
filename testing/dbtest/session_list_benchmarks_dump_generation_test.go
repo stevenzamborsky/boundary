@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/boundary/internal/host/static"
 	"github.com/hashicorp/boundary/internal/iam"
 	"github.com/hashicorp/boundary/internal/kms"
-	"github.com/hashicorp/boundary/internal/servers"
+	"github.com/hashicorp/boundary/internal/server"
 	"github.com/hashicorp/boundary/internal/session"
 	"github.com/hashicorp/boundary/internal/target"
 	"github.com/hashicorp/boundary/internal/target/tcp"
@@ -130,11 +130,11 @@ func TestGenerateSessionBenchmarkTemplateDumps(t *testing.T) {
 			require.NoError(err)
 			connRepo, err := session.NewConnectionRepository(ctx, rw, rw, kms)
 			require.NoError(err)
-			serversRepo, err := servers.NewRepository(rw, rw, kms)
+			serversRepo, err := server.NewRepository(rw, rw, kms)
 			require.NoError(err)
-			worker := servers.NewWorker(scope.Global.String(),
-				servers.WithPublicId("test_worker_1"),
-				servers.WithAddress("127.0.0.1"))
+			worker := server.NewWorker(scope.Global.String(),
+				server.WithPublicId("test_worker_1"),
+				server.WithAddress("127.0.0.1"))
 			_, _, err = serversRepo.UpsertWorker(ctx, worker)
 			require.NoError(err)
 

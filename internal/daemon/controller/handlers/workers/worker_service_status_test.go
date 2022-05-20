@@ -5,7 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/hashicorp/boundary/internal/servers/store"
+	"github.com/hashicorp/boundary/internal/server"
+	"github.com/hashicorp/boundary/internal/server/store"
 	"github.com/hashicorp/boundary/internal/types/scope"
 
 	"github.com/google/go-cmp/cmp"
@@ -17,7 +18,6 @@ import (
 	"github.com/hashicorp/boundary/internal/host/static"
 	"github.com/hashicorp/boundary/internal/iam"
 	"github.com/hashicorp/boundary/internal/kms"
-	"github.com/hashicorp/boundary/internal/servers"
 	"github.com/hashicorp/boundary/internal/session"
 	"github.com/hashicorp/boundary/internal/target"
 	"github.com/hashicorp/boundary/internal/target/tcp"
@@ -33,17 +33,17 @@ func TestStatus(t *testing.T) {
 	kms := kms.TestKms(t, conn, wrapper)
 	org, prj := iam.TestScopes(t, iam.TestRepo(t, conn, wrapper))
 
-	serverRepo, _ := servers.NewRepository(rw, rw, kms)
+	serverRepo, _ := server.NewRepository(rw, rw, kms)
 	serverRepo.UpsertController(ctx, &store.Controller{
 		PrivateId: "test_controller1",
 		Address:   "127.0.0.1",
 	})
-	serverRepo.UpsertWorker(ctx, servers.NewWorker(
+	serverRepo.UpsertWorker(ctx, server.NewWorker(
 		scope.Global.String(),
-		servers.WithPublicId("test_worker1"),
-		servers.WithAddress("127.0.0.1")))
+		server.WithPublicId("test_worker1"),
+		server.WithAddress("127.0.0.1")))
 
-	serversRepoFn := func() (*servers.Repository, error) {
+	serversRepoFn := func() (*server.Repository, error) {
 		return serverRepo, nil
 	}
 	sessionRepoFn := func() (*session.Repository, error) {
@@ -71,7 +71,7 @@ func TestStatus(t *testing.T) {
 		target.WithSessionConnectionLimit(-1),
 	)
 
-	worker1 := servers.TestWorker(t, conn, wrapper)
+	worker1 := server.TestWorker(t, conn, wrapper)
 
 	sess := session.TestSession(t, conn, wrapper, session.ComposedOf{
 		UserId:          uId,
@@ -105,7 +105,7 @@ func TestStatus(t *testing.T) {
 			name:    "No Sessions",
 			wantErr: false,
 			req: &pbs.StatusRequest{
-				Worker: &servers.Server{
+				Worker: &server.Server{
 					PrivateId:  worker1.PublicId,
 					Address:    worker1.Address,
 					CreateTime: worker1.CreateTime,
@@ -113,7 +113,7 @@ func TestStatus(t *testing.T) {
 				},
 			},
 			want: &pbs.StatusResponse{
-				Controllers: []*servers.Server{
+				Controllers: []*server.Server{
 					{
 						PrivateId: "test_controller1",
 						Address:   "127.0.0.1",
@@ -125,7 +125,7 @@ func TestStatus(t *testing.T) {
 			name:    "Still Active",
 			wantErr: false,
 			req: &pbs.StatusRequest{
-				Worker: &servers.Server{
+				Worker: &server.Server{
 					PrivateId:  worker1.PublicId,
 					Address:    worker1.Address,
 					CreateTime: worker1.CreateTime,
@@ -152,7 +152,7 @@ func TestStatus(t *testing.T) {
 				},
 			},
 			want: &pbs.StatusResponse{
-				Controllers: []*servers.Server{
+				Controllers: []*server.Server{
 					{
 						PrivateId: "test_controller1",
 						Address:   "127.0.0.1",
@@ -179,14 +179,14 @@ func TestStatus(t *testing.T) {
 					got,
 					cmpopts.IgnoreUnexported(
 						pbs.StatusResponse{},
-						servers.Server{},
+						server.Server{},
 						pbs.JobChangeRequest{},
 						pbs.Job{},
 						pbs.Job_SessionInfo{},
 						pbs.SessionJobInfo{},
 						pbs.Connection{},
 					),
-					cmpopts.IgnoreFields(servers.Server{}, "CreateTime", "UpdateTime"),
+					cmpopts.IgnoreFields(server.Server{}, "CreateTime", "UpdateTime"),
 				),
 			)
 		})
@@ -201,17 +201,17 @@ func TestStatusSessionClosed(t *testing.T) {
 	kms := kms.TestKms(t, conn, wrapper)
 	org, prj := iam.TestScopes(t, iam.TestRepo(t, conn, wrapper))
 
-	serverRepo, _ := servers.NewRepository(rw, rw, kms)
+	serverRepo, _ := server.NewRepository(rw, rw, kms)
 	serverRepo.UpsertController(ctx, &store.Controller{
 		PrivateId: "test_controller1",
 		Address:   "127.0.0.1",
 	})
-	serverRepo.UpsertWorker(ctx, servers.NewWorker(
+	serverRepo.UpsertWorker(ctx, server.NewWorker(
 		scope.Global.String(),
-		servers.WithPublicId("test_worker1"),
-		servers.WithAddress("127.0.0.1")))
+		server.WithPublicId("test_worker1"),
+		server.WithAddress("127.0.0.1")))
 
-	serversRepoFn := func() (*servers.Repository, error) {
+	serversRepoFn := func() (*server.Repository, error) {
 		return serverRepo, nil
 	}
 	sessionRepoFn := func() (*session.Repository, error) {
@@ -239,7 +239,7 @@ func TestStatusSessionClosed(t *testing.T) {
 		target.WithSessionConnectionLimit(-1),
 	)
 
-	worker1 := servers.TestWorker(t, conn, wrapper)
+	worker1 := server.TestWorker(t, conn, wrapper)
 
 	sess := session.TestSession(t, conn, wrapper, session.ComposedOf{
 		UserId:          uId,
@@ -290,7 +290,7 @@ func TestStatusSessionClosed(t *testing.T) {
 				require.NoError(t, err)
 			},
 			req: &pbs.StatusRequest{
-				Worker: &servers.Server{
+				Worker: &server.Server{
 					PrivateId:  worker1.PublicId,
 					Address:    worker1.Address,
 					CreateTime: worker1.CreateTime,
@@ -317,7 +317,7 @@ func TestStatusSessionClosed(t *testing.T) {
 				},
 			},
 			want: &pbs.StatusResponse{
-				Controllers: []*servers.Server{
+				Controllers: []*server.Server{
 					{
 						PrivateId: "test_controller1",
 						Address:   "127.0.0.1",
@@ -361,14 +361,14 @@ func TestStatusSessionClosed(t *testing.T) {
 					got,
 					cmpopts.IgnoreUnexported(
 						pbs.StatusResponse{},
-						servers.Server{},
+						server.Server{},
 						pbs.JobChangeRequest{},
 						pbs.Job{},
 						pbs.Job_SessionInfo{},
 						pbs.SessionJobInfo{},
 						pbs.Connection{},
 					),
-					cmpopts.IgnoreFields(servers.Server{}, "CreateTime", "UpdateTime"),
+					cmpopts.IgnoreFields(server.Server{}, "CreateTime", "UpdateTime"),
 				),
 			)
 		})
@@ -383,17 +383,17 @@ func TestStatusDeadConnection(t *testing.T) {
 	kms := kms.TestKms(t, conn, wrapper)
 	org, prj := iam.TestScopes(t, iam.TestRepo(t, conn, wrapper))
 
-	serverRepo, _ := servers.NewRepository(rw, rw, kms)
+	serverRepo, _ := server.NewRepository(rw, rw, kms)
 	serverRepo.UpsertController(ctx, &store.Controller{
 		PrivateId: "test_controller1",
 		Address:   "127.0.0.1",
 	})
-	serverRepo.UpsertWorker(ctx, servers.NewWorker(
+	serverRepo.UpsertWorker(ctx, server.NewWorker(
 		scope.Global.String(),
-		servers.WithPublicId("test_worker1"),
-		servers.WithAddress("127.0.0.1")))
+		server.WithPublicId("test_worker1"),
+		server.WithAddress("127.0.0.1")))
 
-	serversRepoFn := func() (*servers.Repository, error) {
+	serversRepoFn := func() (*server.Repository, error) {
 		return serverRepo, nil
 	}
 	sessionRepoFn := func() (*session.Repository, error) {
@@ -421,7 +421,7 @@ func TestStatusDeadConnection(t *testing.T) {
 		target.WithSessionConnectionLimit(-1),
 	)
 
-	worker1 := servers.TestWorker(t, conn, wrapper)
+	worker1 := server.TestWorker(t, conn, wrapper)
 
 	sess := session.TestSession(t, conn, wrapper, session.ComposedOf{
 		UserId:          uId,
@@ -460,7 +460,7 @@ func TestStatusDeadConnection(t *testing.T) {
 	require.NotEqual(t, deadConn.PublicId, connection.PublicId)
 
 	req := &pbs.StatusRequest{
-		Worker: &servers.Server{
+		Worker: &server.Server{
 			PrivateId:  worker1.PublicId,
 			Address:    worker1.Address,
 			CreateTime: worker1.CreateTime,
@@ -487,7 +487,7 @@ func TestStatusDeadConnection(t *testing.T) {
 		},
 	}
 	want := &pbs.StatusResponse{
-		Controllers: []*servers.Server{
+		Controllers: []*server.Server{
 			{
 				PrivateId: "test_controller1",
 				Address:   "127.0.0.1",
@@ -502,14 +502,14 @@ func TestStatusDeadConnection(t *testing.T) {
 			got,
 			cmpopts.IgnoreUnexported(
 				pbs.StatusResponse{},
-				servers.Server{},
+				server.Server{},
 				pbs.JobChangeRequest{},
 				pbs.Job{},
 				pbs.Job_SessionInfo{},
 				pbs.SessionJobInfo{},
 				pbs.Connection{},
 			),
-			cmpopts.IgnoreFields(servers.Server{}, "CreateTime", "UpdateTime"),
+			cmpopts.IgnoreFields(server.Server{}, "CreateTime", "UpdateTime"),
 		),
 	)
 

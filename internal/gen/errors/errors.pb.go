@@ -7,11 +7,12 @@
 package errors
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	api "github.com/hashicorp/boundary/internal/gen/controller/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (

@@ -1,7 +1,7 @@
-package servers
+package server
 
 import (
-	"github.com/hashicorp/boundary/internal/servers/store"
+	"github.com/hashicorp/boundary/internal/server/store"
 	"google.golang.org/protobuf/proto"
 )
 

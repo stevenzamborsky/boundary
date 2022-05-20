@@ -1,4 +1,4 @@
-package servers
+package server
 
 const (
 	deleteWhereCreateTimeSql = `create_time < ?`

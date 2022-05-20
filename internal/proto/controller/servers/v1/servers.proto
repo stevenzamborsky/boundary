@@ -4,7 +4,7 @@ package controller.servers.v1;
 
 import "controller/storage/timestamp/v1/timestamp.proto";
 
-option go_package = "github.com/hashicorp/boundary/internal/servers;servers";
+option go_package = "github.com/hashicorp/boundary/internal/server;server";
 
 // Server contains all fields related to a Controller or Worker resource
 message Server {

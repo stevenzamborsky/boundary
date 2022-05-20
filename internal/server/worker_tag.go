@@ -1,4 +1,4 @@
-package servers
+package server
 
 // A Tag is a custom key/value pair which can be attached to a Worker.
 // Multiple Tags may contain the same key and different values in which

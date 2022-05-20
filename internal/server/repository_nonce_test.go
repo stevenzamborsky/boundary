@@ -1,4 +1,4 @@
-package servers_test
+package server_test
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/boundary/globals"
 	"github.com/hashicorp/boundary/internal/daemon/controller"
 	"github.com/hashicorp/boundary/internal/db"
-	"github.com/hashicorp/boundary/internal/servers"
+	"github.com/hashicorp/boundary/internal/server"
 	"github.com/hashicorp/boundary/internal/types/scope"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,14 +50,14 @@ func TestRecoveryNonces(t *testing.T) {
 	roleClient := roles.NewClient(client)
 	_, err = roleClient.Create(tc.Context(), scope.Global.String())
 	require.NoError(err)
-	nonces, err := repo.ListNonces(tc.Context(), servers.NoncePurposeRecovery)
+	nonces, err := repo.ListNonces(tc.Context(), server.NoncePurposeRecovery)
 	require.NoError(err)
 	assert.Len(nonces, 1)
 
 	// Token 1, try 2
 	_, err = roleClient.Create(tc.Context(), scope.Global.String())
 	require.Error(err)
-	nonces, err = repo.ListNonces(tc.Context(), servers.NoncePurposeRecovery)
+	nonces, err = repo.ListNonces(tc.Context(), server.NoncePurposeRecovery)
 	require.NoError(err)
 	assert.Len(nonces, 1)
 
@@ -65,13 +65,13 @@ func TestRecoveryNonces(t *testing.T) {
 	roleClient.ApiClient().SetToken(token2)
 	_, err = roleClient.Create(tc.Context(), scope.Global.String())
 	require.NoError(err)
-	nonces, err = repo.ListNonces(tc.Context(), servers.NoncePurposeRecovery)
+	nonces, err = repo.ListNonces(tc.Context(), server.NoncePurposeRecovery)
 	require.NoError(err)
 	assert.Len(nonces, 2)
 
 	// Make sure they get cleaned up
 	time.Sleep(2 * controller.NonceCleanupInterval)
-	nonces, err = repo.ListNonces(tc.Context(), servers.NoncePurposeRecovery)
+	nonces, err = repo.ListNonces(tc.Context(), server.NoncePurposeRecovery)
 	require.NoError(err)
 	assert.Len(nonces, 0)
 
@@ -80,7 +80,7 @@ func TestRecoveryNonces(t *testing.T) {
 		roleClient.ApiClient().SetToken(token)
 		_, err = roleClient.Create(tc.Context(), scope.Global.String())
 		require.Error(err)
-		nonces, err = repo.ListNonces(tc.Context(), servers.NoncePurposeRecovery)
+		nonces, err = repo.ListNonces(tc.Context(), server.NoncePurposeRecovery)
 		require.NoError(err)
 		assert.Len(nonces, 0)
 	}

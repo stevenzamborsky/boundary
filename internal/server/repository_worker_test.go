@@ -1,4 +1,4 @@
-package servers_test
+package server_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/boundary/internal/daemon/controller"
 	"github.com/hashicorp/boundary/internal/db"
 	"github.com/hashicorp/boundary/internal/kms"
-	"github.com/hashicorp/boundary/internal/servers"
+	"github.com/hashicorp/boundary/internal/server"
 	"github.com/hashicorp/boundary/internal/types/scope"
 	"github.com/stretchr/testify/require"
 )
@@ -23,42 +23,42 @@ func TestTagUpdatingListing(t *testing.T) {
 	defer tc.Shutdown()
 
 	repo := tc.ServersRepo()
-	srv := servers.NewWorker(scope.Global.String(),
-		servers.WithPublicId("test_worker_1"),
-		servers.WithAddress("127.0.0.1"),
-		servers.WithWorkerTags(
-			&servers.Tag{
+	srv := server.NewWorker(scope.Global.String(),
+		server.WithPublicId("test_worker_1"),
+		server.WithAddress("127.0.0.1"),
+		server.WithWorkerTags(
+			&server.Tag{
 				Key:   "tag1",
 				Value: "value1",
 			},
-			&servers.Tag{
+			&server.Tag{
 				Key:   "tag1",
 				Value: "value2",
 			}))
 
-	_, _, err := repo.UpsertWorker(tc.Context(), srv, servers.WithUpdateTags(true))
+	_, _, err := repo.UpsertWorker(tc.Context(), srv, server.WithUpdateTags(true))
 	require.NoError(err)
 
-	srv = servers.NewWorker(scope.Global.String(),
-		servers.WithPublicId("test_worker_2"),
-		servers.WithAddress("127.0.0.1"),
-		servers.WithWorkerTags(
-			&servers.Tag{
+	srv = server.NewWorker(scope.Global.String(),
+		server.WithPublicId("test_worker_2"),
+		server.WithAddress("127.0.0.1"),
+		server.WithWorkerTags(
+			&server.Tag{
 				Key:   "tag2",
 				Value: "value1",
 			},
-			&servers.Tag{
+			&server.Tag{
 				Key:   "tag2",
 				Value: "value2",
 			}))
-	_, _, err = repo.UpsertWorker(tc.Context(), srv, servers.WithUpdateTags(true))
+	_, _, err = repo.UpsertWorker(tc.Context(), srv, server.WithUpdateTags(true))
 	require.NoError(err)
 
 	tags, err := repo.ListTagsForWorkers(tc.Context(), []string{"test_worker_1", "test_worker_2"})
 	require.NoError(err)
 
 	// Base case
-	exp := map[string][]*servers.Tag{
+	exp := map[string][]*server.Tag{
 		"test_worker_1": {
 			{
 				Key:   "tag1",
@@ -82,15 +82,15 @@ func TestTagUpdatingListing(t *testing.T) {
 	require.Equal(exp, tags)
 
 	// Update without saying to update tags
-	srv = servers.NewWorker(scope.Global.String(),
-		servers.WithPublicId("test_worker_2"),
-		servers.WithAddress("192.168.1.1"),
-		servers.WithWorkerTags(
-			&servers.Tag{
+	srv = server.NewWorker(scope.Global.String(),
+		server.WithPublicId("test_worker_2"),
+		server.WithAddress("192.168.1.1"),
+		server.WithWorkerTags(
+			&server.Tag{
 				Key:   "tag22",
 				Value: "value21",
 			},
-			&servers.Tag{
+			&server.Tag{
 				Key:   "tag22",
 				Value: "value22",
 			}))
@@ -101,13 +101,13 @@ func TestTagUpdatingListing(t *testing.T) {
 	require.Equal(exp, tags)
 
 	// Update tags and test again
-	_, _, err = repo.UpsertWorker(tc.Context(), srv, servers.WithUpdateTags(true))
+	_, _, err = repo.UpsertWorker(tc.Context(), srv, server.WithUpdateTags(true))
 	require.NoError(err)
 	tags, err = repo.ListTagsForWorkers(tc.Context(), []string{"test_worker_1", "test_worker_2"})
 	require.NoError(err)
 	require.NotEqual(exp, tags)
 	// Update and try again
-	exp["test_worker_2"] = []*servers.Tag{
+	exp["test_worker_2"] = []*server.Tag{
 		{
 			Key:   "tag22",
 			Value: "value21",
@@ -127,14 +127,14 @@ func TestListWorkersWithLiveness(t *testing.T) {
 	rw := db.New(conn)
 	wrapper := db.TestWrapper(t)
 	kms := kms.TestKms(t, conn, wrapper)
-	serversRepo, err := servers.NewRepository(rw, rw, kms)
+	serversRepo, err := server.NewRepository(rw, rw, kms)
 	require.NoError(err)
 	ctx := context.Background()
 
-	newWorker := func(publicId string) *servers.Worker {
-		result := servers.NewWorker(scope.Global.String(),
-			servers.WithPublicId(publicId),
-			servers.WithAddress("127.0.0.1"))
+	newWorker := func(publicId string) *server.Worker {
+		result := server.NewWorker(scope.Global.String(),
+			server.WithPublicId(publicId),
+			server.WithAddress("127.0.0.1"))
 		_, rowsUpdated, err := serversRepo.UpsertWorker(ctx, result)
 		require.NoError(err)
 		require.Equal(1, rowsUpdated)
@@ -155,7 +155,7 @@ func TestListWorkersWithLiveness(t *testing.T) {
 	require.NoError(err)
 	require.Equal(1, rowsUpdated)
 
-	requireIds := func(expected []string, actual []*servers.Worker) {
+	requireIds := func(expected []string, actual []*server.Worker) {
 		require.Len(expected, len(actual))
 		want := make(map[string]struct{})
 		for _, v := range expected {
@@ -183,13 +183,13 @@ func TestListWorkersWithLiveness(t *testing.T) {
 
 	// Static liveness. Should get two, so long as this did not take
 	// more than 5s to execute.
-	result, err = serversRepo.ListWorkers(ctx, servers.WithLiveness(time.Second*5))
+	result, err = serversRepo.ListWorkers(ctx, server.WithLiveness(time.Second*5))
 	require.NoError(err)
 	require.Len(result, 2)
 	requireIds([]string{server1.PublicId, server2.PublicId}, result)
 
 	// Liveness disabled, should get all three workers.
-	result, err = serversRepo.ListWorkers(ctx, servers.WithLiveness(-1))
+	result, err = serversRepo.ListWorkers(ctx, server.WithLiveness(-1))
 	require.NoError(err)
 	require.Len(result, 3)
 	requireIds([]string{server1.PublicId, server2.PublicId, server3.PublicId}, result)

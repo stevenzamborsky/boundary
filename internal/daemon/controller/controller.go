@@ -26,7 +26,7 @@ import (
 	hostplugin "github.com/hashicorp/boundary/internal/plugin/host"
 	"github.com/hashicorp/boundary/internal/scheduler"
 	"github.com/hashicorp/boundary/internal/scheduler/job"
-	"github.com/hashicorp/boundary/internal/servers"
+	"github.com/hashicorp/boundary/internal/server"
 	"github.com/hashicorp/boundary/internal/session"
 	"github.com/hashicorp/boundary/internal/target"
 	"github.com/hashicorp/boundary/internal/types/scope"
@@ -283,8 +283,8 @@ func New(ctx context.Context, conf *Config) (*Controller, error) {
 	c.VaultCredentialRepoFn = func() (*vault.Repository, error) {
 		return vault.NewRepository(dbase, dbase, c.kms, c.scheduler)
 	}
-	c.ServersRepoFn = func() (*servers.Repository, error) {
-		return servers.NewRepository(dbase, dbase, c.kms)
+	c.ServersRepoFn = func() (*server.Repository, error) {
+		return server.NewRepository(dbase, dbase, c.kms)
 	}
 	c.OidcRepoFn = func() (*oidc.Repository, error) {
 		return oidc.NewRepository(ctx, dbase, dbase, c.kms)

@@ -7,11 +7,12 @@
 package services
 
 import (
-	servers "github.com/hashicorp/boundary/internal/servers"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+
+	server "github.com/hashicorp/boundary/internal/server"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -470,7 +471,7 @@ type StatusRequest struct {
 	// The worker info. We could use information from the TLS connection but this
 	// is easier and going the other route doesn't provide much benefit -- if you
 	// get access to the key and spoof the connection, you're already compromised.
-	Worker *servers.Server `protobuf:"bytes,10,opt,name=worker,proto3" json:"worker,omitempty"`
+	Worker *server.Server `protobuf:"bytes,10,opt,name=worker,proto3" json:"worker,omitempty"`
 	// Jobs which this worker wants to report the status.
 	Jobs []*JobStatus `protobuf:"bytes,20,rep,name=jobs,proto3" json:"jobs,omitempty"`
 	// Whether to update tags from the Server block on this RPC. We only need to
@@ -512,7 +513,7 @@ func (*StatusRequest) Descriptor() ([]byte, []int) {
 	return file_controller_servers_services_v1_server_coordination_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *StatusRequest) GetWorker() *servers.Server {
+func (x *StatusRequest) GetWorker() *server.Server {
 	if x != nil {
 		return x.Worker
 	}
@@ -594,7 +595,7 @@ type StatusResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	// Active controllers. This can be used for connection management.
-	Controllers []*servers.Server `protobuf:"bytes,10,rep,name=controllers,proto3" json:"controllers,omitempty"`
+	Controllers []*server.Server `protobuf:"bytes,10,rep,name=controllers,proto3" json:"controllers,omitempty"`
 	// List of jobs and the expected state changes.  For example, this will
 	// include jobs witch change type of canceled for jobs which are active on a
 	// worker but should be canceled. This could also contain a request to start a
@@ -635,7 +636,7 @@ func (*StatusResponse) Descriptor() ([]byte, []int) {
 	return file_controller_servers_services_v1_server_coordination_service_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *StatusResponse) GetControllers() []*servers.Server {
+func (x *StatusResponse) GetControllers() []*server.Server {
 	if x != nil {
 		return x.Controllers
 	}
@@ -796,7 +797,7 @@ var file_controller_servers_services_v1_server_coordination_service_proto_goType
 	(*StatusRequest)(nil),    // 8: controller.servers.services.v1.StatusRequest
 	(*JobChangeRequest)(nil), // 9: controller.servers.services.v1.JobChangeRequest
 	(*StatusResponse)(nil),   // 10: controller.servers.services.v1.StatusResponse
-	(*servers.Server)(nil),   // 11: controller.servers.v1.Server
+	(*server.Server)(nil),    // 11: controller.servers.v1.Server
 }
 var file_controller_servers_services_v1_server_coordination_service_proto_depIdxs = []int32{
 	0,  // 0: controller.servers.services.v1.Connection.status:type_name -> controller.servers.services.v1.CONNECTIONSTATUS

@@ -1,11 +1,11 @@
-package servers
+package server
 
 import (
 	"context"
 	"testing"
 
 	"github.com/hashicorp/boundary/internal/db"
-	"github.com/hashicorp/boundary/internal/servers/store"
+	"github.com/hashicorp/boundary/internal/server/store"
 	"github.com/stretchr/testify/assert"
 )
 

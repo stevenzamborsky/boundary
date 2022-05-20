@@ -6,12 +6,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/hashicorp/boundary/internal/servers"
-
 	"github.com/hashicorp/boundary/internal/daemon/worker/common"
 	"github.com/hashicorp/boundary/internal/daemon/worker/session"
 	pbs "github.com/hashicorp/boundary/internal/gen/controller/servers/services"
 	"github.com/hashicorp/boundary/internal/observability/event"
+	"github.com/hashicorp/boundary/internal/server"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -135,18 +134,18 @@ func (w *Worker) sendWorkerStatus(cancelCtx context.Context) {
 
 	// Send status information
 	client := w.controllerStatusConn.Load().(pbs.ServerCoordinationServiceClient)
-	var tags map[string]*servers.TagValues
+	var tags map[string]*server.TagValues
 	// If we're not going to request a tag update, no reason to have these
 	// marshaled on every status call.
 	if w.updateTags.Load() {
-		tags = w.tags.Load().(map[string]*servers.TagValues)
+		tags = w.tags.Load().(map[string]*server.TagValues)
 	}
 	statusCtx, statusCancel := context.WithTimeout(cancelCtx, common.StatusTimeout)
 	defer statusCancel()
 
 	result, err := client.Status(statusCtx, &pbs.StatusRequest{
 		Jobs: activeJobs,
-		Worker: &servers.Server{
+		Worker: &server.Server{
 			PrivateId: w.conf.RawConfig.Worker.Name,
 			Address:   w.conf.RawConfig.Worker.PublicAddr,
 			Tags:      tags,

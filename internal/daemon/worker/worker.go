@@ -14,8 +14,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hashicorp/boundary/internal/servers"
-
 	"github.com/hashicorp/boundary/globals"
 	"github.com/hashicorp/boundary/internal/cmd/base"
 	"github.com/hashicorp/boundary/internal/cmd/config"
@@ -23,6 +21,7 @@ import (
 	"github.com/hashicorp/boundary/internal/daemon/worker/session"
 	pbs "github.com/hashicorp/boundary/internal/gen/controller/servers/services"
 	"github.com/hashicorp/boundary/internal/observability/event"
+	"github.com/hashicorp/boundary/internal/server"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-secure-stdlib/base62"
 	"github.com/hashicorp/go-secure-stdlib/mlock"
@@ -279,12 +278,12 @@ func (w *Worker) Resolver() *manual.Resolver {
 
 func (w *Worker) ParseAndStoreTags(incoming map[string][]string) {
 	if len(incoming) == 0 {
-		w.tags.Store(map[string]*servers.TagValues{})
+		w.tags.Store(map[string]*server.TagValues{})
 		return
 	}
-	tags := make(map[string]*servers.TagValues, len(incoming))
+	tags := make(map[string]*server.TagValues, len(incoming))
 	for k, v := range incoming {
-		tags[k] = &servers.TagValues{
+		tags[k] = &server.TagValues{
 			Values: append(make([]string, 0, len(v)), v...),
 		}
 	}

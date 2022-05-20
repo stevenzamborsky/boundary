@@ -7,6 +7,9 @@
 package services
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	accounts "github.com/hashicorp/boundary/sdk/pbs/controller/api/resources/accounts"
 	_ "github.com/hashicorp/boundary/sdk/pbs/controller/protooptions"
@@ -14,8 +17,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -125,7 +126,7 @@ type ListAccountsRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	AuthMethodId string `protobuf:"bytes,1,opt,name=auth_method_id,proto3" json:"auth_method_id,omitempty" class:"public"` // @gotags: `class:"public"`
-	Filter       string `protobuf:"bytes,30,opt,name=filter,proto3" json:"filter,omitempty" class:"sensitive"`                // @gotags: `class:"sensitive"`
+	Filter       string `protobuf:"bytes,30,opt,name=filter,proto3" json:"filter,omitempty" class:"sensitive"`             // @gotags: `class:"sensitive"`
 }
 
 func (x *ListAccountsRequest) Reset() {

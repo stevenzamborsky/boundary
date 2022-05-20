@@ -1,4 +1,4 @@
-package servers
+package server
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/boundary/internal/db"
 	"github.com/hashicorp/boundary/internal/errors"
-	"github.com/hashicorp/boundary/internal/servers/store"
+	"github.com/hashicorp/boundary/internal/server/store"
 )
 
 func (r *Repository) ListControllers(ctx context.Context, opt ...Option) ([]*store.Controller, error) {
@@ -40,4 +40,37 @@ func (r *Repository) listControllersWithReader(ctx context.Context, reader db.Re
 	}
 
 	return controllers, nil
+}
+
+func (r *Repository) UpsertController(ctx context.Context, controller *store.Controller) (int, error) {
+	const op = "servers.UpsertController"
+
+	if controller == nil {
+		return db.NoRowsAffected, errors.New(ctx, errors.InvalidParameter, op, "controller is nil")
+	}
+
+	var rowsUpdated int64
+	_, err := r.writer.DoTx(
+		ctx,
+		db.StdRetryCnt,
+		db.ExpBackoff{},
+		func(read db.Reader, w db.Writer) error {
+			var err error
+			onConflict := &db.OnConflict{
+				Target: db.Columns{"private_id"},
+				Action: append(db.SetColumns([]string{"description", "address"}), db.SetColumnValues(map[string]interface{}{"update_time": "now()"})...),
+			}
+			err = w.Create(ctx, controller, db.WithOnConflict(onConflict), db.WithReturnRowsAffected(&rowsUpdated))
+			if err != nil {
+				return errors.Wrap(ctx, err, op+":Upsert")
+			}
+
+			return nil
+		},
+	)
+	if err != nil {
+		return db.NoRowsAffected, err
+	}
+
+	return int(rowsUpdated), nil
 }

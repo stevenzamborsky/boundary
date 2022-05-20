@@ -7,13 +7,14 @@
 package plugin
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	hostcatalogs "github.com/hashicorp/boundary/sdk/pbs/controller/api/resources/hostcatalogs"
 	hostsets "github.com/hashicorp/boundary/sdk/pbs/controller/api/resources/hostsets"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
