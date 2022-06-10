@@ -139,6 +139,8 @@ type Controller struct {
 	GracefulShutdownWait         interface{} `hcl:"graceful_shutdown_wait_duration"`
 	GracefulShutdownWaitDuration time.Duration
 
+	OtelCollectorAddress string `hcl:"otel_collector_address"`
+
 	// StatusGracePeriod represents the period of time (as a duration) that the
 	// controller will wait before marking connections from a disconnected worker
 	// as invalid.

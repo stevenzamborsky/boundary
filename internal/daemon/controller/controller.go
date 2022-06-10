@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"contrib.go.opencensus.io/exporter/ocagent"
 	"github.com/hashicorp/boundary/internal/auth/oidc"
 	"github.com/hashicorp/boundary/internal/auth/password"
 	"github.com/hashicorp/boundary/internal/authtoken"
@@ -36,6 +37,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-secure-stdlib/mlock"
 	"github.com/hashicorp/go-secure-stdlib/pluginutil/v2"
+	"go.opencensus.io/trace"
 	ua "go.uber.org/atomic"
 	"google.golang.org/grpc"
 )
@@ -80,6 +82,8 @@ type Controller struct {
 	scheduler *scheduler.Scheduler
 
 	kms *kms.Kms
+
+	ocExporter *ocagent.Exporter
 
 	enabledPlugins []base.EnabledPlugin
 
@@ -131,6 +135,17 @@ func New(ctx context.Context, conf *Config) (*Controller, error) {
 					"file.",
 				err)
 		}
+	}
+
+	if conf.RawConfig.Controller.OtelCollectorAddress != "" {
+		c.ocExporter, err = ocagent.NewExporter(
+			ocagent.WithAddress(conf.RawConfig.Controller.OtelCollectorAddress),
+			ocagent.WithInsecure(),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create a new ocagent exporter: %v", err)
+		}
+		trace.RegisterExporter(c.ocExporter)
 	}
 
 	clusterListeners := make([]*base.ServerListener, 0)
@@ -367,6 +382,7 @@ func (c *Controller) Shutdown() error {
 	}
 	defer c.started.Store(false)
 	c.baseCancel()
+	c.ocExporter.Stop()
 	if err := c.stopServersAndListeners(); err != nil {
 		return fmt.Errorf("error stopping controller servers and listeners: %w", err)
 	}

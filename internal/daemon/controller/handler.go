@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/boundary/internal/auth/oidc"
 	"github.com/hashicorp/boundary/internal/daemon/common"
 	"github.com/hashicorp/boundary/internal/daemon/controller/auth"
+	"github.com/hashicorp/boundary/internal/daemon/controller/handlers"
 	"github.com/hashicorp/boundary/internal/daemon/controller/handlers/accounts"
 	"github.com/hashicorp/boundary/internal/daemon/controller/handlers/authmethods"
 	"github.com/hashicorp/boundary/internal/daemon/controller/handlers/authtokens"
@@ -43,11 +44,11 @@ import (
 	"github.com/hashicorp/go-secure-stdlib/listenerutil"
 	"github.com/hashicorp/go-secure-stdlib/strutil"
 	"github.com/mr-tron/base58"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/hashicorp/boundary/internal/daemon/controller/handlers"
 )
 
 type HandlerProperties struct {
@@ -77,8 +78,16 @@ func (c *Controller) apiHandler(props HandlerProperties) (http.Handler, error) {
 		return nil, err
 	}
 	metricsHandler := metric.InstrumentApiHandler(eventsHandler)
+	tracingHandler := &ochttp.Handler{
+		Handler: metricsHandler,
+		StartOptions: trace.StartOptions{
+			Sampler:  trace.AlwaysSample(),
+			SpanKind: trace.SpanKindServer,
+		},
+		IsPublicEndpoint: true,
+	}
 
-	return metricsHandler, nil
+	return tracingHandler, nil
 }
 
 // GetHealthHandler returns a gRPC Gateway mux that is registered against the

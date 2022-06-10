@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 
+	"contrib.go.opencensus.io/integrations/ocsql"
 	"github.com/hashicorp/boundary/internal/errors"
 	"github.com/hashicorp/go-dbw"
 	_ "github.com/jackc/pgx/v4"
+	"go.opencensus.io/trace"
 	"gorm.io/driver/postgres"
 )
 
@@ -82,8 +84,25 @@ func Open(dbType DbType, connectionUrl string, opt ...Option) (*DB, error) {
 	var dialect dbw.Dialector
 	switch dbType {
 	case Postgres:
+		driverName, err := ocsql.Register("pgx", ocsql.WithOptions(ocsql.TraceOptions{
+			AllowRoot:      false,
+			Ping:           true,
+			RowsNext:       true,
+			RowsClose:      true,
+			RowsAffected:   true,
+			LastInsertID:   true,
+			Query:          true,
+			QueryParams:    true,
+			InstanceName:   "boundary-gorm",
+			DisableErrSkip: false,
+			Sampler:        trace.AlwaysSample(),
+		}))
+		if err != nil {
+			return nil, fmt.Errorf("failed to register ocsql driver: %w", err)
+		}
 		dialect = postgres.New(postgres.Config{
-			DSN: connectionUrl,
+			DSN:        connectionUrl,
+			DriverName: driverName,
 		},
 		)
 	default:

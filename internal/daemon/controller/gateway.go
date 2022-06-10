@@ -5,7 +5,6 @@ import (
 	"math"
 	"net"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/hashicorp/boundary/globals"
@@ -16,7 +15,10 @@ import (
 	"github.com/hashicorp/boundary/internal/kms"
 	"github.com/hashicorp/boundary/internal/observability/event"
 	"github.com/hashicorp/boundary/internal/types/subtypes"
+	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -29,7 +31,13 @@ type grpcServerListener interface {
 
 func gatewayDialOptions(lis grpcServerListener) []grpc.DialOption {
 	return []grpc.DialOption{
-		grpc.WithInsecure(),
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{
+			StartOptions: trace.StartOptions{
+				Sampler:  trace.AlwaysSample(),
+				SpanKind: trace.SpanKindClient,
+			},
+		}),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
 			return lis.Dial()
 		}),
@@ -72,17 +80,15 @@ func newGrpcServer(
 	return grpc.NewServer(
 		grpc.MaxRecvMsgSize(math.MaxInt32),
 		grpc.MaxSendMsgSize(math.MaxInt32),
-		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				requestCtxInterceptor,                         // populated requestInfo from headers into the request ctx
-				errorInterceptor(ctx),                         // convert domain and api errors into headers for the http proxy
-				subtypes.AttributeTransformerInterceptor(ctx), // convert to/from generic attributes from/to subtype specific attributes
-				auditRequestInterceptor(ctx),                  // before we get started, audit the request
-				statusCodeInterceptor(ctx),                    // convert grpc codes into http status codes for the http proxy (can modify the resp)
-				auditResponseInterceptor(ctx),                 // as we finish, audit the response
-				grpc_recovery.UnaryServerInterceptor( // recover from panics with a grpc internal error
-					grpc_recovery.WithRecoveryHandlerContext(recoveryHandler()),
-				),
+		grpc.ChainUnaryInterceptor(
+			requestCtxInterceptor,                         // populated requestInfo from headers into the request ctx
+			errorInterceptor(ctx),                         // convert domain and api errors into headers for the http proxy
+			subtypes.AttributeTransformerInterceptor(ctx), // convert to/from generic attributes from/to subtype specific attributes
+			auditRequestInterceptor(ctx),                  // before we get started, audit the request
+			statusCodeInterceptor(ctx),                    // convert grpc codes into http status codes for the http proxy (can modify the resp)
+			auditResponseInterceptor(ctx),                 // as we finish, audit the response
+			grpc_recovery.UnaryServerInterceptor( // recover from panics with a grpc internal error
+				grpc_recovery.WithRecoveryHandlerContext(recoveryHandler()),
 			),
 		),
 	), ticket, nil
