@@ -129,7 +129,7 @@ scenario "vault" {
     value = step.create_vault_cluster.vault_root_token
   }
   output "target" {
-    value = step.create_target.target_public_ips
+    value = step.create_target.target_ips
   }
 }
 
