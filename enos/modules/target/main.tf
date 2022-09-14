@@ -46,6 +46,10 @@ resource "aws_instance" "target" {
   vpc_security_group_ids = [aws_security_group.boundary_target.id]
   subnet_id              = tolist(data.aws_subnets.infra.ids)[count.index % length(data.aws_subnets.infra.ids)]
   key_name               = var.aws_ssh_keypair_name
+  user_data              = templatefile("${path.module}/templates/user_data.sh.tpl", {
+      username = var.username,
+      password = var.password
+  })
 
   tags = {
     "Name" : "boundary-target-${count.index}",
@@ -57,4 +61,17 @@ resource "aws_instance" "target" {
 
 output "target_ips" {
   value = aws_instance.target.*.private_ip
+}
+output "target_public_ips" {
+  value = aws_instance.target.*.public_ip
+}
+
+# Corpsec folks: yes we are enabling password based SSH auth (sorry) to test user/password brokering in Boundary,
+# BUT this instance is locked down via security groups to only the IP running enos and itself
+variable "username" {
+  default = "test"
+}
+
+variable "password" {
+  default = "Hunter2!"
 }
