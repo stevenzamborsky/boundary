@@ -49,6 +49,10 @@ module "random_stringifier" {
   source = "./modules/random_stringifier"
 }
 
+module "vault_setup" {
+  source = "./modules/vault_setup"
+}
+
 module "target" {
   source       = "./modules/target"
   target_count = var.target_count

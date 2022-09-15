@@ -97,3 +97,17 @@ variable "vault_instance_type" {
   type        = string
   default     = "t3a.small"
 }
+
+# Test Scenarios
+
+variable "ssh_username" {
+  description = "User created on target nodes for credential brokering validation"
+  type        = string
+  default     = "testuser"
+}
+
+variable "ssh_password" {
+  description = "Password for user created for credential brokering validation"
+  type        = string
+  default     = "Hunter2!"
+}

@@ -79,13 +79,13 @@ scenario "vault" {
     ]
 
     variables {
-      ami_id          = step.create_base_infra.ami_ids["ubuntu"]["amd64"]
-      instance_type   = var.vault_instance_type
-      instance_count  = 1
-      kms_key_arn     = step.create_base_infra.kms_key_arn
-      storage_backend = "raft"
+      ami_id            = step.create_base_infra.ami_ids["ubuntu"]["amd64"]
+      instance_type     = var.vault_instance_type
+      instance_count    = 1
+      kms_key_arn       = step.create_base_infra.kms_key_arn
+      storage_backend   = "raft"
       sg_additional_ips = step.create_boundary_cluster.controller_ips
-      unseal_method   = "awskms"
+      unseal_method     = "awskms"
       vault_release = {
         version = "1.11.0"
         edition = "oss"
@@ -94,7 +94,7 @@ scenario "vault" {
     }
   }
 
-    step "create_target" {
+  step "create_target" {
     module     = module.target
     depends_on = [step.create_base_infra]
 
@@ -103,10 +103,22 @@ scenario "vault" {
       aws_ssh_keypair_name = var.aws_ssh_keypair_name
       enos_user            = var.enos_user
       instance_type        = var.target_instance_type
-      target_count = 1
+      target_count         = 1
       vpc_id               = step.create_base_infra.vpc_id
-      #username = "test"
-      #password = "test"
+      username             = var.ssh_username
+      password             = var.ssh_password
+    }
+  }
+
+  step "setup_vault" {
+    module     = module.vault_setup
+    depends_on = [step.create_vault_cluster]
+
+    variables {
+      ssh_username = var.ssh_username
+      ssh_password = var.ssh_password
+      vault_ip     = step.create_vault_cluster.instance_public_ips[0]
+      vault_token  = step.create_vault_cluster.vault_root_token
     }
   }
 
@@ -123,7 +135,7 @@ scenario "vault" {
     value = step.create_boundary_cluster.auth_password
   }
   output "vault_addr" {
-    value = step.create_vault_cluster.vault_instances
+    value = step.create_vault_cluster.instance_public_ips[0]
   }
   output "vault_root_token" {
     value = step.create_vault_cluster.vault_root_token

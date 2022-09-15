@@ -46,9 +46,9 @@ resource "aws_instance" "target" {
   vpc_security_group_ids = [aws_security_group.boundary_target.id]
   subnet_id              = tolist(data.aws_subnets.infra.ids)[count.index % length(data.aws_subnets.infra.ids)]
   key_name               = var.aws_ssh_keypair_name
-  user_data              = templatefile("${path.module}/templates/user_data.sh.tpl", {
-      username = var.username,
-      password = var.password
+  user_data = templatefile("${path.module}/templates/user_data.sh.tpl", {
+    username = var.username,
+    password = var.password
   })
 
   tags = {
