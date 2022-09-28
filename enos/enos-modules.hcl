@@ -31,6 +31,10 @@ module "build_local" {
   source = "./modules/build_local"
 }
 
+module "iam_setup" {
+  source = "./modules/iam_setup"
+}
+
 module "infra" {
   source  = "app.terraform.io/hashicorp-qti/aws-infra/enos"
   version = ">= 0.3.1"
@@ -47,10 +51,6 @@ module "infra" {
 
 module "random_stringifier" {
   source = "./modules/random_stringifier"
-}
-
-module "vault_setup" {
-  source = "./modules/vault_setup"
 }
 
 module "target" {
@@ -72,6 +72,10 @@ module "test_cli_ui" {
 
 module "test_e2e" {
   source = "./modules/test_e2e"
+}
+
+module "vault_setup" {
+  source = "./modules/vault_setup"
 }
 
 module "vault" {
