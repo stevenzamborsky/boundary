@@ -295,7 +295,7 @@ func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, 
 	}
 
 	run := allocDataKeyVersionDestructionJobRun()
-	err := k.reader.LookupWhere(ctx, &run, "is_running=true and table_name!=?", []any{tableName})
+	err := k.reader.LookupWhere(ctx, &run, "is_running=true and table_name!=?", []interface{}{tableName})
 	switch {
 	case err == nil:
 		// Another run was already running
@@ -307,7 +307,7 @@ func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, 
 	}
 	// Find the oldest or currently running run for our tablename
 	run = allocDataKeyVersionDestructionJobRun()
-	rows, err := k.reader.Query(ctx, oldestPendingOrRunningRun, []any{tableName})
+	rows, err := k.reader.Query(ctx, oldestPendingOrRunningRun, []interface{}{tableName})
 	if err != nil {
 		return errors.Wrap(ctx, err, op, errors.WithMsg("failed to query pending runs for %q", tableName))
 	}
@@ -341,7 +341,7 @@ func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, 
 			defer cancel()
 		}
 		// Update the progress of this run
-		args := []any{
+		args := []interface{}{
 			sql.Named("key_id", run.KeyId),
 			sql.Named("table_name", tableName),
 		}
@@ -355,7 +355,7 @@ func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, 
 		}
 	}()
 
-	rows, err = k.reader.Query(ctx, dataKeyVersionIdScopeIdQuery, []any{run.KeyId})
+	rows, err = k.reader.Query(ctx, dataKeyVersionIdScopeIdQuery, []interface{}{run.KeyId})
 	if err != nil {
 		return errors.Wrap(ctx, err, op, errors.WithMsg("failed to get scope id for data key version"))
 	}
@@ -370,6 +370,34 @@ func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, 
 	// Call the function to rewrap the data in the table. The progress will be automatically
 	// updated by the deferred function.
 	return rewrapFn(ctx, run.KeyId, scopeId, k.reader, k.writer, k)
+}
+
+// MonitorDataKeyVersionDestruction monitors any pending destruction jobs. If
+// a job has finished rewrapping all rows, it will destroy the key version
+// by calling RevokeKeyVersion on the underlying kms.
+func (k *Kms) MonitorDataKeyVersionDestruction(ctx context.Context) error {
+	const op = "kms.(Kms).MonitorDataKeyVersionDestruction"
+
+	rows, err := k.reader.Query(ctx, finishedDestructionJobsQuery, nil)
+	if err != nil {
+		return errors.Wrap(ctx, err, op, errors.WithMsg("failed to find completed destruction jobs"))
+	}
+	defer rows.Close()
+	var completedDataKeyVersionIds []string
+	for rows.Next() {
+		if err := k.reader.ScanRows(ctx, rows, &completedDataKeyVersionIds); err != nil {
+			return errors.Wrap(ctx, err, op)
+		}
+	}
+	for _, dataKeyVersionId := range completedDataKeyVersionIds {
+		// Finally, revoke the key, deleting it from the database.
+		// This will error if anything still references it that isn't
+		// meant to be cascade deleted.
+		if err := k.underlying.RevokeKeyVersion(ctx, dataKeyVersionId); err != nil {
+			return errors.Wrap(ctx, err, op)
+		}
+	}
+	return nil
 }
 
 // VerifyGlobalRoot will verify that the global root wrapper is reasonable.
