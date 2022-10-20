@@ -296,6 +296,12 @@ func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, 
 	}
 
 	run := allocDataKeyVersionDestructionJobRun()
+	// Check if there is already another run running for another table name. If so,
+	// we exit early since we are limited to 1 run at a time. Note that we exclude
+	// our own table name from the search, since if there is a running run for our
+	// table name, thanks to the scheduler guaranteeing that only one instance of a job
+	// is running at a time, it means we were interrupted in our processing last time
+	// and should simply resume that running run.
 	err := k.reader.LookupWhere(ctx, &run, "is_running=true and table_name!=?", []interface{}{tableName})
 	switch {
 	case err == nil:
