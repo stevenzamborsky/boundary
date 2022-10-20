@@ -466,6 +466,8 @@ keyLoop:
 		if err := r.SearchWhere(ctx, &tables, "1=1", nil, db.WithLimit(-1)); err != nil {
 			return errors.Wrap(ctx, err, op, errors.WithMsg("failed to look up allowed table names"))
 		}
+		// Start by adding any job runs necessary by looking up the number of
+		// rows encrypted with the key that's being destroyed.
 		for _, table := range tables {
 			rows, err := r.Query(ctx, fmt.Sprintf(findAffectedRowsForKeyQueryTemplate, table.GetTableName()), []interface{}{keyVersionId})
 			if err != nil {
@@ -501,6 +503,7 @@ keyLoop:
 		}
 		job := allocDataKeyVersionDestructionJob()
 		job.KeyId = keyVersionId
+		// Create the destruction job since we know we have at least one job run.
 		if err := w.Create(ctx, &job); err != nil {
 			return errors.Wrap(ctx, err, op, errors.WithMsg("failed to insert new key version destruction job"))
 		}
