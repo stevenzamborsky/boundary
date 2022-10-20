@@ -1,4 +1,4 @@
-package scope_test
+package static_test
 
 import (
 	"context"
@@ -79,9 +79,6 @@ func TestKeyDestructionCli(t *testing.T) {
 		"-format", "json",
 	)
 	require.NoError(t, output.Err, string(output.Stderr))
-	var rotate scopes.KeysRotateResult
-	err = json.Unmarshal(output.Stdout, &rotate)
-	require.NoError(t, err)
 
 	output = e2e.RunCommand(
 		"boundary", "scopes", "list-keys",
@@ -223,9 +220,8 @@ func TestKeyDestructionApi(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, keys.Items, 7)
 	// Assert that all keys have the same number of versions
-	numVersions := len(keys.Items[0].Versions)
 	for _, key := range keys.Items {
-		assert.Len(t, key.Versions, numVersions)
+		assert.Len(t, key.Versions, 1)
 	}
 
 	// Create OIDC auth method to create some encrypted data in the scope
@@ -249,12 +245,11 @@ func TestKeyDestructionApi(t *testing.T) {
 	assert.Len(t, keys.Items, 7)
 	// Assert that all keys have the same number of versions,
 	// one higher than before
-	numVersions += 1
 	var rootKeyVersionToDestroy *scopes.KeyVersion
 	var databaseKeyVersionToDestroy *scopes.KeyVersion
 	for _, key := range keys.Items {
 		// Each key should have a new version after rotation
-		assert.Len(t, key.Versions, numVersions)
+		assert.Len(t, key.Versions, 2)
 		if key.Purpose == "rootKey" {
 			// Key versions are ordered by version, descending.
 			// Pick the second newest version.
