@@ -283,9 +283,9 @@ func (k *Kms) ListDataKeyVersionDestructionJobs(ctx context.Context, scopeId str
 	return jobs, nil
 }
 
-// MonitorTableRewrappingRuns checks for pending rewrapping runs for the
-// specified table name, and attempts to become the running run and
-// start rewrapping data in the specified table. This may be a long running operation.
+// MonitorTableRewrappingRuns checks for pending rewrapping job runs for the
+// specified table name, and attempts to execute each job run and start rewrapping
+// data in the specified table. This may be a long running operation.
 // Options are ignored.
 func (k *Kms) MonitorTableRewrappingRuns(ctx context.Context, tableName string, _ ...Option) (retErr error) {
 	const op = "kms.(Kms).MonitorTableRewrappingRuns"
