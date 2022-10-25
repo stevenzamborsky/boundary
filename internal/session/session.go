@@ -100,11 +100,11 @@ type Session struct {
 	// Worker filter
 	WorkerFilter string `json:"-" gorm:"default:null"`
 
-	// key_id is the key ID that was used for the encryption operation. It can be
-	// used to identify a specific version of the key needed to decrypt the value,
-	// which is useful for caching purposes.
-	// @inject_tag: `gorm:"not_null"`
+	// key_id is the key ID that was used to encrypt the Tofutoken.
 	KeyId string `json:"key_id,omitempty" gorm:"default:null"`
+	// certificate_key_id is the key ID that was used to derive the certificate
+	// private key. The private key itself is not stored in the database.
+	CertificateKeyId string `json:"certificate_key_id,omitempty" gorm:"not_null"`
 
 	// States for the session which are for read only and are ignored during
 	// write operations
