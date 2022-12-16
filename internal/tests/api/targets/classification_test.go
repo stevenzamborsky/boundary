@@ -89,7 +89,8 @@ func TestTargets(t *testing.T) {
 					},
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: &wrapperspb.UInt32Value{Value: 26},
+							DefaultPort:       &wrapperspb.UInt32Value{Value: 26},
+							DefaultClientPort: &wrapperspb.UInt32Value{Value: 27},
 						},
 					},
 					AuthorizedActions: []string{"action-1"},
@@ -150,7 +151,8 @@ func TestTargets(t *testing.T) {
 					},
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: &wrapperspb.UInt32Value{Value: 26},
+							DefaultPort:       &wrapperspb.UInt32Value{Value: 26},
+							DefaultClientPort: &wrapperspb.UInt32Value{Value: 27},
 						},
 					},
 					AuthorizedActions: []string{"action-1"},

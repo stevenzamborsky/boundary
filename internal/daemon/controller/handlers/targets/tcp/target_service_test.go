@@ -578,7 +578,8 @@ func TestCreate(t *testing.T) {
 				Type:        tcp.Subtype.String(),
 				Attrs: &pb.Target_TcpTargetAttributes{
 					TcpTargetAttributes: &pb.TcpTargetAttributes{
-						DefaultPort: wrapperspb.UInt32(2),
+						DefaultPort:       wrapperspb.UInt32(2),
+						DefaultClientPort: wrapperspb.UInt32(3),
 					},
 				},
 				EgressWorkerFilter: wrapperspb.String(`type == "bar"`),
@@ -593,7 +594,8 @@ func TestCreate(t *testing.T) {
 					Type:        tcp.Subtype.String(),
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(2),
+							DefaultPort:       wrapperspb.UInt32(2),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 					SessionMaxSeconds:      wrapperspb.UInt32(28800),
@@ -623,7 +625,8 @@ func TestCreate(t *testing.T) {
 				Type:        tcp.Subtype.String(),
 				Attrs: &pb.Target_TcpTargetAttributes{
 					TcpTargetAttributes: &pb.TcpTargetAttributes{
-						DefaultPort: wrapperspb.UInt32(2),
+						DefaultPort:       wrapperspb.UInt32(2),
+						DefaultClientPort: wrapperspb.UInt32(3),
 					},
 				},
 			}},
@@ -805,7 +808,8 @@ func TestUpdate(t *testing.T) {
 		target.WithDescription("default"),
 		target.WithSessionMaxSeconds(1),
 		target.WithSessionConnectionLimit(1),
-		target.WithDefaultPort(2))
+		target.WithDefaultPort(2),
+		target.WithDefaultClientPort(3))
 	require.NoError(t, err)
 	tar, _, _, err := repo.CreateTarget(context.Background(), ttar)
 	require.NoError(t, err)
@@ -817,7 +821,7 @@ func TestUpdate(t *testing.T) {
 		require.NoError(t, err)
 
 		tar, _, _, _, err = repo.UpdateTarget(context.Background(), tar, itar.GetVersion(),
-			[]string{"Name", "Description", "SessionMaxSeconds", "SessionConnectionLimit", "DefaultPort"})
+			[]string{"Name", "Description", "SessionMaxSeconds", "SessionConnectionLimit", "DefaultPort", "DefaultClientPort"})
 		require.NoError(t, err, "Failed to reset target.")
 	}
 
@@ -865,7 +869,8 @@ func TestUpdate(t *testing.T) {
 					Type:        tcp.Subtype.String(),
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(2),
+							DefaultPort:       wrapperspb.UInt32(2),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 					CreatedTime:            tar.GetCreateTime().GetTimestamp(),
@@ -901,7 +906,8 @@ func TestUpdate(t *testing.T) {
 					Type:        tcp.Subtype.String(),
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(2),
+							DefaultPort:       wrapperspb.UInt32(2),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 					HostSourceIds:          hostSourceIds,
@@ -941,7 +947,8 @@ func TestUpdate(t *testing.T) {
 				Item: &pb.Target{
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(0),
+							DefaultPort:       wrapperspb.UInt32(0),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 				},
@@ -999,7 +1006,8 @@ func TestUpdate(t *testing.T) {
 					Type:        tcp.Subtype.String(),
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(2),
+							DefaultPort:       wrapperspb.UInt32(2),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 					HostSourceIds:          hostSourceIds,
@@ -1033,7 +1041,8 @@ func TestUpdate(t *testing.T) {
 					Type:        tcp.Subtype.String(),
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(2),
+							DefaultPort:       wrapperspb.UInt32(2),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 					HostSourceIds:          hostSourceIds,
@@ -1066,7 +1075,8 @@ func TestUpdate(t *testing.T) {
 					CreatedTime: tar.GetCreateTime().GetTimestamp(),
 					Attrs: &pb.Target_TcpTargetAttributes{
 						TcpTargetAttributes: &pb.TcpTargetAttributes{
-							DefaultPort: wrapperspb.UInt32(2),
+							DefaultPort:       wrapperspb.UInt32(2),
+							DefaultClientPort: wrapperspb.UInt32(3),
 						},
 					},
 					Type:                   tcp.Subtype.String(),
@@ -1284,6 +1294,7 @@ func TestUpdate_BadVersion(t *testing.T) {
 	ttar, err := target.New(ctx, tcp.Subtype, proj.GetPublicId(), target.WithName("default"), target.WithDescription("default"))
 	tar := ttar.(*tcp.Target)
 	tar.DefaultPort = 2
+	tar.DefaultClientPort = 3
 	require.NoError(t, err)
 	gtar, _, _, err := repo.CreateTarget(context.Background(), tar)
 	require.NoError(t, err)

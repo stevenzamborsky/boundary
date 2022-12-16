@@ -22,6 +22,9 @@ func (a *attribute) Options() []target.Option {
 	if a.GetDefaultPort().GetValue() != 0 {
 		opts = append(opts, target.WithDefaultPort(a.GetDefaultPort().GetValue()))
 	}
+	if a.GetDefaultClientPort().GetValue() != 0 {
+		opts = append(opts, target.WithDefaultClientPort(a.GetDefaultClientPort().GetValue()))
+	}
 	return opts
 }
 
@@ -68,6 +71,9 @@ func setAttributes(t target.Target, out *pb.Target) error {
 	}
 	if t.GetDefaultPort() > 0 {
 		attrs.TcpTargetAttributes.DefaultPort = &wrappers.UInt32Value{Value: t.GetDefaultPort()}
+	}
+	if t.GetDefaultClientPort() > 0 {
+		attrs.TcpTargetAttributes.DefaultClientPort = &wrappers.UInt32Value{Value: t.GetDefaultClientPort()}
 	}
 
 	out.Attrs = attrs

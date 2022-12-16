@@ -82,6 +82,10 @@ func (t *Target) GetDefaultPort() uint32 {
 	return t.DefaultPort
 }
 
+func (t *Target) GetDefaultClientPort() uint32 {
+	return t.DefaultClientPort
+}
+
 func (t *Target) GetName() string {
 	return t.Name
 }
@@ -161,6 +165,10 @@ func (t *Target) SetVersion(v uint32) {
 
 func (t *Target) SetDefaultPort(port uint32) {
 	t.DefaultPort = port
+}
+
+func (t *Target) SetDefaultClientPort(port uint32) {
+	t.DefaultClientPort = port
 }
 
 func (t *Target) SetCreateTime(ts *timestamp.Timestamp) {
@@ -274,6 +282,7 @@ func New(projectId string, opt ...target.Option) (target.Target, error) {
 			Name:                   opts.WithName,
 			Description:            opts.WithDescription,
 			DefaultPort:            opts.WithDefaultPort,
+			DefaultClientPort:      opts.WithDefaultClientPort,
 			SessionConnectionLimit: opts.WithSessionConnectionLimit,
 			SessionMaxSeconds:      opts.WithSessionMaxSeconds,
 			WorkerFilter:           opts.WithWorkerFilter,

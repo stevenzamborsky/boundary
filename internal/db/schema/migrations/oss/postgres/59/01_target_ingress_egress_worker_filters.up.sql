@@ -67,6 +67,7 @@ create trigger insert_tcp_target_filter_validate before insert on target_tcp
 -- Update views
 
 -- Replaces target_all_subtypes defined in 44/03_targets.up.sql
+-- Replaced in 6/01_target_default_client_port.up.sql
 drop view target_all_subtypes;
 create view target_all_subtypes as
 select public_id,
