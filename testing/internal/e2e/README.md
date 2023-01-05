@@ -82,6 +82,11 @@ export VAULT_ADDR=  # e.g. http://127.0.0.1:8200
 export VAULT_TOKEN=
 ```
 
+If you're running the UI tests...
+```
+go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps
+```
+
 Then, run...
 ```shell
 go test github.com/hashicorp/boundary/testing/e2e/target // run target tests
