@@ -93,6 +93,12 @@ variable "boundary_install_dir" {
   default     = "/opt/boundary/bin"
 }
 
+variable "boundary_ui_dir" {
+  description = "Path to local boundary-ui directory"
+  type        = string
+  default     = null
+}
+
 variable "tfc_api_token" {
   description = "The Terraform Cloud QTI Organization API token."
   type        = string
