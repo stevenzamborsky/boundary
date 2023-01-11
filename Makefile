@@ -8,6 +8,7 @@ REPO_PATH := github.com/hashicorp/boundary
 
 CGO_ENABLED?=0
 GO_PATH = $(shell go env GOPATH)
+SED?=$(shell command -v gsed || command -v sed)
 
 export GEN_BASEPATH := $(shell pwd)
 
@@ -237,6 +238,13 @@ protobuild:
 	@buf generate --template buf.testing.gen.yaml --path internal/proto/testing/event/v1/
 
 	@rm -R ${TMP_DIR}
+
+	# copy needed protos to api package to avoid a dep on sdk
+	cp sdk/pbs/controller/protooptions/options.pb.go api/internal/pbs/controller/protooptions
+	cp sdk/pbs/controller/api/resources/targets/target.pb.go api/internal/pbs/controller/api/resources/targets/target.pb.go
+	$(SED) -i -e 's/boundary\/sdk/boundary\/api\/internal/' api/internal/pbs/controller/api/resources/targets/target.pb.go
+	cp sdk/pbs/controller/api/resources/scopes/scope.pb.go api/internal/pbs/controller/api/resources/scopes/scope.pb.go
+	$(SED) -i -e 's/boundary\/sdk/boundary\/api\/internal/' api/internal/pbs/controller/api/resources/scopes/scope.pb.go
 
 .PHONY: protolint
 protolint:
