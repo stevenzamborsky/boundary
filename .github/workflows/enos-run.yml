@@ -145,7 +145,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           name: hashicorp/boundary-ui
-          ref: refs/heads/moduli-e2e-tests-ICU-7418 # !! CHANGE TO refs/heads/main
+          ref: moduli-e2e-tests-ICU-7418 # !! CHANGE TO main
           path: enos/support/boundary-ui
       - name: Install node
         if: matrix.filter == 'e2e_ui builder:crt'
