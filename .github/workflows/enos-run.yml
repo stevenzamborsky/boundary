@@ -140,16 +140,14 @@ jobs:
         run: |
           unzip ${{steps.download.outputs.download-path}}/*.zip -d enos/support/boundary
           mv ${{steps.download.outputs.download-path}}/*.zip enos/support/boundary.zip
-      - name: Get boundary-ui source code
+      - uses: actions/checkout@v3
         if: matrix.filter == 'e2e_ui builder:crt'
-        uses: actions/checkout@v3
         with:
           name: hashicorp/boundary-ui
           ref: moduli-e2e-tests-ICU-7418 # !! CHANGE TO main
           path: enos/support/boundary-ui
-      - name: Install node
+      - uses: actions/setup-node@v3
         if: matrix.filter == 'e2e_ui builder:crt'
-        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
       - name: Install boundary-ui dependencies
