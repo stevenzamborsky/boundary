@@ -152,7 +152,7 @@ jobs:
         with:
           node-version: '16.x'
       - name: Install boundary-ui dependencies
-        run: yarn install
+        run: yarn --cwd enos/support/boundary-ui install
       - name: Output Terraform version info
         # Use the same env vars from the following step
         env:
