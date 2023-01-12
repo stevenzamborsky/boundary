@@ -154,7 +154,7 @@ jobs:
           node-version: '16.x'
       - name: Install boundary-ui dependencies
         if: matrix.filter == 'e2e_ui builder:crt'
-        run: yarn --cwd enos/support/boundary-ui/ui/admin install
+        run: yarn --cwd enos/support/boundary-ui install
       - name: Output Terraform version info
         # Use the same env vars from the following step
         env:

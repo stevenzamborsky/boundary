@@ -121,8 +121,6 @@ resource "enos_local_exec" "run_e2e_ui_test" {
     E2E_AWS_HOST_SET_IPS2         = local.aws_host_set_ips2
   }
 
-  // !! change this to a yarn command later
-  // inline = ["cd ${var.boundary_ui_dir}/ui/admin; PATH=\"${var.local_boundary_dir}:$PATH\" npx playwright test --config ./tests/e2e/playwright.config.js"]
   inline = ["cd ${var.boundary_ui_dir}/ui/admin; PATH=\"${var.local_boundary_dir}:$PATH\" yarn run e2e"]
 }
 
