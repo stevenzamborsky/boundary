@@ -147,12 +147,14 @@ jobs:
           repository: hashicorp/boundary-ui
           ref: moduli-e2e-tests-ICU-7418 # !! CHANGE TO main
           path: enos/support/boundary-ui
-      - uses: actions/setup-node@v3
+      - name: Set up node for e2e UI tests
+        uses: actions/setup-node@v3
         if: matrix.filter == 'e2e_ui builder:crt'
         with:
           node-version: '16.x'
       - name: Install boundary-ui dependencies
-        run: yarn --cwd enos/support/boundary-ui install
+        if: matrix.filter == 'e2e_ui builder:crt'
+        run: yarn --cwd enos/support/boundary-ui/ui/admin install
       - name: Output Terraform version info
         # Use the same env vars from the following step
         env:
