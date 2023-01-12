@@ -140,6 +140,11 @@ jobs:
         run: |
           unzip ${{steps.download.outputs.download-path}}/*.zip -d enos/support/boundary
           mv ${{steps.download.outputs.download-path}}/*.zip enos/support/boundary.zip
+      - name: Set up node for e2e UI tests
+        uses: actions/setup-node@v3
+        if: matrix.filter == 'e2e_ui builder:crt'
+        with:
+          node-version: '16.x'
       - name: Checkout boundary-ui
         uses: actions/checkout@v3
         if: matrix.filter == 'e2e_ui builder:crt'
@@ -147,14 +152,11 @@ jobs:
           repository: hashicorp/boundary-ui
           ref: moduli-e2e-tests-ICU-7418 # !! CHANGE TO main
           path: enos/support/boundary-ui
-      - name: Set up node for e2e UI tests
-        uses: actions/setup-node@v3
-        if: matrix.filter == 'e2e_ui builder:crt'
-        with:
-          node-version: '16.x'
       - name: Install boundary-ui dependencies
         if: matrix.filter == 'e2e_ui builder:crt'
         run: yarn --cwd enos/support/boundary-ui install
+      - name: Install playwright dependencies
+        run: npx playwright install --with-deps
       - name: Output Terraform version info
         # Use the same env vars from the following step
         env:
