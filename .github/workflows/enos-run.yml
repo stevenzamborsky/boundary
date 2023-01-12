@@ -140,11 +140,12 @@ jobs:
         run: |
           unzip ${{steps.download.outputs.download-path}}/*.zip -d enos/support/boundary
           mv ${{steps.download.outputs.download-path}}/*.zip enos/support/boundary.zip
-      - uses: actions/checkout@v3
+      - name: Checkout boundary-ui
+        uses: actions/checkout@v3
         if: matrix.filter == 'e2e_ui builder:crt'
         with:
-          name: hashicorp/boundary-ui
-          # ref: moduli-e2e-tests-ICU-7418 # !! CHANGE TO main
+          repository: hashicorp/boundary-ui
+          ref: moduli-e2e-tests-ICU-7418 # !! CHANGE TO main
           path: enos/support/boundary-ui
       - uses: actions/setup-node@v3
         if: matrix.filter == 'e2e_ui builder:crt'
