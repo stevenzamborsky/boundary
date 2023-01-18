@@ -230,3 +230,5 @@ jobs:
         run: |
           env
           find ./enos -name "scenario.tf" -exec cat {} \;
+
+# !! only run UI tests on releases?
