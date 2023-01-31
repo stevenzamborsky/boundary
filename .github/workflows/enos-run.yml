@@ -157,6 +157,7 @@ jobs:
         run: yarn --cwd enos/support/boundary-ui install
       - name: Install playwright dependencies
         run: npx playwright install --with-deps
+        working-directory: enos/support/boundary-ui
       - name: Output Terraform version info
         # Use the same env vars from the following step
         env:
