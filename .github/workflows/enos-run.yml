@@ -156,6 +156,7 @@ jobs:
         if: matrix.filter == 'e2e_ui builder:crt'
         run: yarn --cwd enos/support/boundary-ui install
       - name: Install playwright dependencies
+        if: matrix.filter == 'e2e_ui builder:crt'
         run: npx playwright install --with-deps
         working-directory: enos/support/boundary-ui
       - name: Output Terraform version info
