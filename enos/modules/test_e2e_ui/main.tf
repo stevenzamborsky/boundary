@@ -121,7 +121,7 @@ resource "enos_local_exec" "run_e2e_ui_test" {
     E2E_AWS_HOST_SET_IPS2         = local.aws_host_set_ips2
   }
 
-  inline = ["cd ${var.boundary_ui_dir}/ui/admin; PATH=\"${var.local_boundary_dir}:$PATH\" yarn run e2e"]
+  inline = ["cd ${var.boundary_ui_dir}/ui/admin; PATH=\"${var.local_boundary_dir}:$PATH\" yarn run e2e 2>&1 | tee ${path.module}/../../test-e2e-ui.out"]
 }
 
 output "test_results" {
