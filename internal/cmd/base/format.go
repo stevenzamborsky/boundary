@@ -182,13 +182,15 @@ func (c *Command) PrintApiError(in *api.Error, contextStr string, opt ...Option)
 	switch Format(c.UI) {
 	case "json":
 		output := struct {
-			Context  string          `json:"context,omitempty"`
-			Status   int             `json:"status"`
-			ApiError json.RawMessage `json:"api_error"`
+			Context    string          `json:"context,omitempty"`
+			StatusCode int             `json:"status_code"`
+			Status     int             `json:"status"` // TODO: Remove this in 0.14.0
+			ApiError   json.RawMessage `json:"api_error"`
 		}{
-			Context:  contextStr,
-			Status:   in.Response().StatusCode(),
-			ApiError: in.Response().Body.Bytes(),
+			Context:    contextStr,
+			StatusCode: in.Response().StatusCode(),
+			Status:     in.Response().StatusCode(),
+			ApiError:   in.Response().Body.Bytes(),
 		}
 		b, _ := JsonFormatter{}.Format(output)
 		c.UI.Error(string(b))
