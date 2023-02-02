@@ -50,12 +50,12 @@ func init() {
 		Add constraints here following this format after adding a Feature to the Feature iota:
 		featureMap[FEATURE] = MetadataConstraint{
 			MetaInfo:    []Metadata{OSS, HCP},
-			Constraints: newConstraints(">= 0.1.0"), // This feature exists at 0.1.0 and above
+			Constraints: mustNewConstraints(">= 0.1.0"), // This feature exists at 0.1.0 and above
 		}
 	*/
 	featureMap[IncludeStatusInCli] = MetadataConstraint{
 		MetaInfo:    []Metadata{OSS, HCP},
-		Constraints: newConstraints("< 0.14.0"),
+		Constraints: mustNewConstraints("< 0.14.0"),
 	}
 }
 
@@ -67,7 +67,7 @@ func metadataStringToMetadata(m string) Metadata {
 	return OSS
 }
 
-func newConstraints(v string) gvers.Constraints {
+func mustNewConstraints(v string) gvers.Constraints {
 	c, err := gvers.NewConstraint(v)
 	if err != nil {
 		panic(err)
