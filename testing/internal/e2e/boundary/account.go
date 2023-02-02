@@ -3,6 +3,7 @@ package boundary
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/boundary/api"
@@ -33,17 +34,17 @@ func CreateNewAccountApi(t testing.TB, ctx context.Context, client *api.Client, 
 }
 
 // CreateNewAccountCli creates a new account using the cli.
-// Returns the id of the new account as well as the password that was generated
-func CreateNewAccountCli(t testing.TB, ctx context.Context, loginName string) (string, string) {
-	c, err := LoadConfig()
+// Returns the id of the new account, the login name, and the password
+func CreateNewAccountCli(t testing.TB, ctx context.Context, authMethodId string) (string, string, string) {
+	loginName, err := base62.Random(16)
 	require.NoError(t, err)
-
+	loginName = strings.ToLower(loginName)
 	password, err := base62.Random(16)
 	require.NoError(t, err)
 	output := e2e.RunCommand(ctx, "boundary",
 		e2e.WithArgs(
 			"accounts", "create", "password",
-			"-auth-method-id", c.AuthMethodId,
+			"-auth-method-id", authMethodId,
 			"-login-name", loginName,
 			"-password", "env://E2E_TEST_ACCOUNT_PASSWORD",
 			"-name", "e2e Account "+loginName,
@@ -60,5 +61,5 @@ func CreateNewAccountCli(t testing.TB, ctx context.Context, loginName string) (s
 
 	newAccountId := newAccountResult.Item.Id
 	t.Logf("Created Account: %s", newAccountId)
-	return newAccountId, password
+	return newAccountId, loginName, password
 }
